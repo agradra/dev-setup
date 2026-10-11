@@ -170,30 +170,6 @@ for %%I in ("%~dp0%RESOURCE_DIR_NAME%\*.ico") do (
     attrib +r "!TARGET_FOLDER!"
     set /a CNT_ICON+=1
     echo   %GRN%[ OK ]%RST% !STATE!  %BOLD%!FOLDER_NAME!%RST% %DIM%-^> %%~nxI%RST%
-
-    :: 아카이브 폴더 세팅
-    if /i not "!FOLDER_NAME!"=="%ARCHIVE_DIR_NAME%" if /i not "!FOLDER_NAME!"=="%TEMP_DIR_NAME%" (
-        set "ARCH_FOLDER=!PARENT_DIR!\%ARCHIVE_DIR_NAME%\!FOLDER_NAME!"
-        set "ARCH_STATE=%DIM%기존%RST%"
-
-        if not exist "!ARCH_FOLDER!\" (
-            md "!ARCH_FOLDER!"
-            set "ARCH_STATE=%GRN%신규%RST%"
-            set /a CNT_ARCH+=1
-        ) else (
-            set /a CNT_ARCH_EXIST+=1
-        )
-
-        set "ARCH_INI=!ARCH_FOLDER!\desktop.ini"
-        if exist "!ARCH_INI!" attrib -h -s "!ARCH_INI!"
-
-        > "!ARCH_INI!" echo [.ShellClassInfo]
-        >> "!ARCH_INI!" echo IconResource=..\..\%CONFIG_DIR_NAME%\%RESOURCE_DIR_NAME%\%%~nxI,0
-
-        attrib +h +s "!ARCH_INI!"
-        attrib +r "!ARCH_FOLDER!"
-        echo   %GRN%[ OK ]%RST% !ARCH_STATE!  %DIM%%ARCHIVE_DIR_NAME%\%RST%%BOLD%!FOLDER_NAME!%RST%
-    )
 )
 echo.
 
