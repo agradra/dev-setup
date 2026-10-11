@@ -2,16 +2,17 @@
 chcp 65001 >nul
 setlocal enabledelayedexpansion
 
-:: =================================================================
-:: [설정 변수]
+
 set "CONFIG_DIR_NAME=.setup"
 set "REPO_DIR_NAME=dev-setup"
+set "ARCHIVE_DIR_NAME=_Archive"
+set "TEMP_DIR_NAME=_Temp"
 set "RESOURCE_DIR_NAME=icons"
 set "CONFIG_ICON_NAME=setup.ico"
 set "DEV_ICON_NAME=dev.ico"
 :: =================================================================
 
-:: ANSI 색상 준비 (Windows 10+)
+:: ANSI 색상
 for /f %%a in ('echo prompt $E^| cmd') do set "ESC=%%a"
 set "RST=%ESC%[0m"
 set "BOLD=%ESC%[1m"
@@ -23,7 +24,7 @@ set "BLU=%ESC%[94m"
 set "CYN=%ESC%[96m"
 
 :: 결과 카운터
-set /a CNT_CREATED=0, CNT_EXIST=0, CNT_ICON=0, CNT_SKIP=0, CNT_FAIL=0
+set /a CNT_CREATED=0, CNT_EXIST=0, CNT_ICON=0, CNT_SKIP=0, CNT_FAIL=0, CNT_ARCH=0, CNT_ARCH_EXIST=0
 set "SYS_RESULT_SETUP=%DIM%건너뜀%RST%"
 set "SYS_RESULT_DEV=%DIM%건너뜀%RST%"
 
@@ -33,10 +34,9 @@ echo %CYN%%RST%  %BOLD%폴더 아이콘 자동 설정 도구%RST%               
 echo %CYN%============================================================%RST%
 echo.
 
-:: 1. 현재 위치 확인
 for %%I in ("%~dp0.") do set "CUR_DIR=%%~nxI"
 
-:: 1-1. 깃허브 레포 이름 그대로 들어온 경우 .setup 으로 자동 변경
+:: 깃허브 레포 이름 -> .setup 자동 변경
 set "NEED_RENAME=0"
 if /i "!CUR_DIR!"=="%REPO_DIR_NAME%" set "NEED_RENAME=1"
 if /i "!CUR_DIR!"=="%REPO_DIR_NAME%-main" set "NEED_RENAME=1"
@@ -52,7 +52,7 @@ if !NEED_RENAME! equ 1 (
         pause
         exit /b
     )
-    :: 실행 중인 폴더는 이름을 바꿀 수 없으므로, 종료 후 변경 및 재실행하는 임시 스크립트 사용
+    :: 종료 후 변경 및 재실행하는 임시 스크립트 사용
     set "HELPER=%TEMP%\setup_rename_%RANDOM%.bat"
     > "!HELPER!" echo @echo off
     >> "!HELPER!" echo timeout /t 2 ^>nul
@@ -70,7 +70,7 @@ if /i not "!CUR_DIR!"=="%CONFIG_DIR_NAME%" (
     exit /b
 )
 
-:: 2. 리소스 폴더 존재 여부 확인
+:: 리소스 폴더 존재 여부 확인
 if not exist "%~dp0%RESOURCE_DIR_NAME%\" (
     echo %RED%  [FAIL]%RST%   '%CONFIG_DIR_NAME%' 폴더 내에 '%RESOURCE_DIR_NAME%' 폴더가 없습니다.
     echo.
@@ -88,7 +88,7 @@ if !ICO_COUNT! equ 0 (
     exit /b
 )
 
-:: 3. 부모 폴더 경로 설정
+:: 부모 폴더 경로 설정
 pushd "%~dp0.."
 set "PARENT_DIR=%CD%"
 popd
@@ -97,11 +97,11 @@ echo %DIM%  대상 경로 : !PARENT_DIR!%RST%
 echo %DIM%  발견된 아이콘 : !ICO_COUNT!개%RST%
 echo.
 
-:: -----------------------------------------------------------------
+
 echo %BLU%%BOLD%[1/3] 기본 폴더 아이콘%RST%
 echo %DIM%------------------------------------------------------------%RST%
 
-:: .setup 폴더 자체의 아이콘 설정
+:: .setup 아이콘 설정
 if exist "%~dp0%CONFIG_ICON_NAME%" (
     set "CONFIG_INI=%~dp0desktop.ini"
 
@@ -120,7 +120,7 @@ if exist "%~dp0%CONFIG_ICON_NAME%" (
     set /a CNT_SKIP+=1
 )
 
-:: DEV 폴더의 아이콘 설정
+:: DEV 아이콘 설정
 if exist "%~dp0%DEV_ICON_NAME%" (
     set "PARENT_INI=!PARENT_DIR!\desktop.ini"
 
@@ -140,11 +140,11 @@ if exist "%~dp0%DEV_ICON_NAME%" (
 )
 echo.
 
-:: -----------------------------------------------------------------
+
 echo %BLU%%BOLD%[2/3] 폴더 생성 및 아이콘 적용%RST%
 echo %DIM%------------------------------------------------------------%RST%
 
-:: 4. .ico 파일 기반 폴더/아이콘 세팅
+:: .ico 파일 기반 폴더/아이콘 세팅
 for %%I in ("%~dp0%RESOURCE_DIR_NAME%\*.ico") do (
     set "FOLDER_NAME=%%~nI"
     set "TARGET_FOLDER=!PARENT_DIR!\!FOLDER_NAME!"
@@ -160,7 +160,7 @@ for %%I in ("%~dp0%RESOURCE_DIR_NAME%\*.ico") do (
 
     set "INI_FILE=!TARGET_FOLDER!\desktop.ini"
 
-    :: 5. 기존 desktop.ini 속성 해제 후 새 파일로 덮어쓰기
+    :: 기존 desktop.ini 덮어쓰기
     if exist "!INI_FILE!" attrib -h -s "!INI_FILE!"
 
     > "!INI_FILE!" echo [.ShellClassInfo]
@@ -170,10 +170,34 @@ for %%I in ("%~dp0%RESOURCE_DIR_NAME%\*.ico") do (
     attrib +r "!TARGET_FOLDER!"
     set /a CNT_ICON+=1
     echo   %GRN%[ OK ]%RST% !STATE!  %BOLD%!FOLDER_NAME!%RST% %DIM%-^> %%~nxI%RST%
+
+    :: 아카이브 폴더 세팅
+    if /i not "!FOLDER_NAME!"=="%ARCHIVE_DIR_NAME%" if /i not "!FOLDER_NAME!"=="%TEMP_DIR_NAME%" (
+        set "ARCH_FOLDER=!PARENT_DIR!\%ARCHIVE_DIR_NAME%\!FOLDER_NAME!"
+        set "ARCH_STATE=%DIM%기존%RST%"
+
+        if not exist "!ARCH_FOLDER!\" (
+            md "!ARCH_FOLDER!"
+            set "ARCH_STATE=%GRN%신규%RST%"
+            set /a CNT_ARCH+=1
+        ) else (
+            set /a CNT_ARCH_EXIST+=1
+        )
+
+        set "ARCH_INI=!ARCH_FOLDER!\desktop.ini"
+        if exist "!ARCH_INI!" attrib -h -s "!ARCH_INI!"
+
+        > "!ARCH_INI!" echo [.ShellClassInfo]
+        >> "!ARCH_INI!" echo IconResource=..\..\%CONFIG_DIR_NAME%\%RESOURCE_DIR_NAME%\%%~nxI,0
+
+        attrib +h +s "!ARCH_INI!"
+        attrib +r "!ARCH_FOLDER!"
+        echo   %GRN%[ OK ]%RST% !ARCH_STATE!  %DIM%%ARCHIVE_DIR_NAME%\%RST%%BOLD%!FOLDER_NAME!%RST%
+    )
 )
 echo.
 
-:: -----------------------------------------------------------------
+
 echo %BLU%%BOLD%[3/3] 아이콘 캐시 갱신%RST%
 echo %DIM%------------------------------------------------------------%RST%
 ie4uinit.exe -show
@@ -181,7 +205,6 @@ echo   %GRN%[ OK ]%RST%   탐색기 아이콘 캐시를 새로고침했습니다
 timeout /t 2 >nul
 echo.
 
-:: =================================================================
 :: 종합 결과
 echo %CYN%============================================================%RST%
 echo %CYN%%RST%  %BOLD%실행 결과 요약%RST%                                         %CYN%%RST%
@@ -190,6 +213,8 @@ echo %CYN%%RST%   %BOLD%.setup 폴더 아이콘%RST%   : !SYS_RESULT_SETUP!
 echo %CYN%%RST%   %BOLD%DEV 폴더 아이콘%RST%      : !SYS_RESULT_DEV!
 echo %CYN%%RST%   %BOLD%새로 생성된 폴더%RST%     : %GRN%!CNT_CREATED!개%RST%
 echo %CYN%%RST%   %BOLD%이미 존재한 폴더%RST%     : %YLW%!CNT_EXIST!개%RST%
+echo %CYN%%RST%   %BOLD%아카이브 신규 생성%RST%   : %GRN%!CNT_ARCH!개%RST%
+echo %CYN%%RST%   %BOLD%아카이브 기존 폴더%RST%   : %YLW%!CNT_ARCH_EXIST!개%RST%
 echo %CYN%%RST%   %BOLD%아이콘 적용 합계%RST%     : %GRN%!CNT_ICON!개%RST%
 echo %CYN%%RST%   %BOLD%건너뜀%RST%               : %DIM%!CNT_SKIP!개%RST%
 echo %CYN%============================================================%RST%
