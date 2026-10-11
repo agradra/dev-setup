@@ -5,6 +5,7 @@ setlocal enabledelayedexpansion
 :: =================================================================
 :: [설정 변수]
 set "CONFIG_DIR_NAME=.setup"
+set "REPO_DIR_NAME=dev-setup"
 set "RESOURCE_DIR_NAME=icons"
 set "CONFIG_ICON_NAME=setup.ico"
 set "DEV_ICON_NAME=dev.ico"
@@ -34,6 +35,33 @@ echo.
 
 :: 1. 현재 위치 확인
 for %%I in ("%~dp0.") do set "CUR_DIR=%%~nxI"
+
+:: 1-1. 깃허브 레포 이름 그대로 들어온 경우 .setup 으로 자동 변경
+set "NEED_RENAME=0"
+if /i "!CUR_DIR!"=="%REPO_DIR_NAME%" set "NEED_RENAME=1"
+if /i "!CUR_DIR!"=="%REPO_DIR_NAME%-main" set "NEED_RENAME=1"
+if /i "!CUR_DIR!"=="%REPO_DIR_NAME%-master" set "NEED_RENAME=1"
+if !NEED_RENAME! equ 1 (
+    pushd "%~dp0.."
+    set "PDIR=!CD!"
+    popd
+    echo %YLW%  [INFO]%RST%   폴더 이름 '!CUR_DIR!' 을^(를^) '%CONFIG_DIR_NAME%' 으로 변경합니다.
+    if exist "!PDIR!\%CONFIG_DIR_NAME%\" (
+        echo %RED%  [FAIL]%RST%   이미 '%CONFIG_DIR_NAME%' 폴더가 존재하여 이름을 변경할 수 없습니다.
+        echo.
+        pause
+        exit /b
+    )
+    :: 실행 중인 폴더는 이름을 바꿀 수 없으므로, 종료 후 변경 및 재실행하는 임시 스크립트 사용
+    set "HELPER=%TEMP%\setup_rename_%RANDOM%.bat"
+    > "!HELPER!" echo @echo off
+    >> "!HELPER!" echo timeout /t 2 ^>nul
+    >> "!HELPER!" echo ren "!PDIR!\!CUR_DIR!" "%CONFIG_DIR_NAME%"
+    >> "!HELPER!" echo start "" /d "!PDIR!\%CONFIG_DIR_NAME%" cmd /c RUN.bat
+    start "" /d "!PDIR!" cmd /c "!HELPER!"
+    echo %DIM%         이름 변경 후 자동으로 다시 실행됩니다.%RST%
+    exit /b
+)
 if /i not "!CUR_DIR!"=="%CONFIG_DIR_NAME%" (
     echo %RED%  [FAIL]%RST%   스크립트가 '%CONFIG_DIR_NAME%' 폴더 안에 있지 않습니다.
     echo %DIM%         현재 위치: !CUR_DIR!%RST%
