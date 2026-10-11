@@ -5,7 +5,11 @@
    ```bash
    git clone https://github.com/agradra/dev-setup.git
    ```
+<<<<<<< HEAD
 2. 생성된 `dev-setup` 폴더 내의 `RUN.bat` 파일 실행
+=======
+2. 생성된 `dev-setup` 폴더 내의 **RUN.bat** 파일 실행
+>>>>>>> 88f61f6167c911d32dda73203a9c9cd99834e3e8
 
 ## 디자인
 
