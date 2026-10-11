@@ -3,17 +3,8 @@
 1. `DEV` 폴더에서 터미널을 열고 아래 명령어로 복사
 
    ```bash
-   git clone https://github.com/agradra/dev-setup.git .setup
+   git clone https://github.com/agradra/dev-setup.git
    ```
-
-   > 뒤에 `.setup`을 붙이면 처음부터 올바른 폴더 이름으로 받아집니다. 생략하고 그냥 clone 해도 `RUN.bat` 실행 시 이름이 자동으로 바뀝니다.
-
-2. `RUN.bat`을 더블클릭하여 실행하거나 터미널에서 실행
-
-   ```bash
-   cd .setup && RUN.bat
-   ```
-
 
 ## 디자인
 
