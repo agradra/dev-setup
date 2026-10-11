@@ -9,7 +9,7 @@
 
 ## 디자인
 
-아이콘은 [Icons8](https://icons8.com)의 **Liquid Glass** 스타일로 통일.
+아이콘은 [Icons8](https://icons8.com/icons)의 **Liquid Glass** 스타일로 통일.
 
 ## 참고
 
