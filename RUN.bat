@@ -6,6 +6,8 @@ setlocal enabledelayedexpansion
 :: [설정 변수]
 set "CONFIG_DIR_NAME=.setup"
 set "REPO_DIR_NAME=dev-setup"
+set "ARCHIVE_DIR_NAME=_Archive"
+set "TEMP_DIR_NAME=_Temp"
 set "RESOURCE_DIR_NAME=icons"
 set "CONFIG_ICON_NAME=setup.ico"
 set "DEV_ICON_NAME=dev.ico"
@@ -23,7 +25,7 @@ set "BLU=%ESC%[94m"
 set "CYN=%ESC%[96m"
 
 :: 결과 카운터
-set /a CNT_CREATED=0, CNT_EXIST=0, CNT_ICON=0, CNT_SKIP=0, CNT_FAIL=0
+set /a CNT_CREATED=0, CNT_EXIST=0, CNT_ICON=0, CNT_SKIP=0, CNT_FAIL=0, CNT_ARCH=0, CNT_ARCH_EXIST=0
 set "SYS_RESULT_SETUP=%DIM%건너뜀%RST%"
 set "SYS_RESULT_DEV=%DIM%건너뜀%RST%"
 
@@ -170,6 +172,30 @@ for %%I in ("%~dp0%RESOURCE_DIR_NAME%\*.ico") do (
     attrib +r "!TARGET_FOLDER!"
     set /a CNT_ICON+=1
     echo   %GRN%[ OK ]%RST% !STATE!  %BOLD%!FOLDER_NAME!%RST% %DIM%-^> %%~nxI%RST%
+
+    :: 6. 아카이브/임시 폴더를 제외한 카테고리는 아카이브 폴더 안에도 동일하게 생성
+    if /i not "!FOLDER_NAME!"=="%ARCHIVE_DIR_NAME%" if /i not "!FOLDER_NAME!"=="%TEMP_DIR_NAME%" (
+        set "ARCH_FOLDER=!PARENT_DIR!\%ARCHIVE_DIR_NAME%\!FOLDER_NAME!"
+        set "ARCH_STATE=%DIM%기존%RST%"
+
+        if not exist "!ARCH_FOLDER!\" (
+            md "!ARCH_FOLDER!"
+            set "ARCH_STATE=%GRN%신규%RST%"
+            set /a CNT_ARCH+=1
+        ) else (
+            set /a CNT_ARCH_EXIST+=1
+        )
+
+        set "ARCH_INI=!ARCH_FOLDER!\desktop.ini"
+        if exist "!ARCH_INI!" attrib -h -s "!ARCH_INI!"
+
+        > "!ARCH_INI!" echo [.ShellClassInfo]
+        >> "!ARCH_INI!" echo IconResource=..\..\%CONFIG_DIR_NAME%\%RESOURCE_DIR_NAME%\%%~nxI,0
+
+        attrib +h +s "!ARCH_INI!"
+        attrib +r "!ARCH_FOLDER!"
+        echo   %GRN%[ OK ]%RST% !ARCH_STATE!  %DIM%%ARCHIVE_DIR_NAME%\%RST%%BOLD%!FOLDER_NAME!%RST%
+    )
 )
 echo.
 
@@ -190,6 +216,8 @@ echo %CYN%%RST%   %BOLD%.setup 폴더 아이콘%RST%   : !SYS_RESULT_SETUP!
 echo %CYN%%RST%   %BOLD%DEV 폴더 아이콘%RST%      : !SYS_RESULT_DEV!
 echo %CYN%%RST%   %BOLD%새로 생성된 폴더%RST%     : %GRN%!CNT_CREATED!개%RST%
 echo %CYN%%RST%   %BOLD%이미 존재한 폴더%RST%     : %YLW%!CNT_EXIST!개%RST%
+echo %CYN%%RST%   %BOLD%아카이브 신규 생성%RST%   : %GRN%!CNT_ARCH!개%RST%
+echo %CYN%%RST%   %BOLD%아카이브 기존 폴더%RST%   : %YLW%!CNT_ARCH_EXIST!개%RST%
 echo %CYN%%RST%   %BOLD%아이콘 적용 합계%RST%     : %GRN%!CNT_ICON!개%RST%
 echo %CYN%%RST%   %BOLD%건너뜀%RST%               : %DIM%!CNT_SKIP!개%RST%
 echo %CYN%============================================================%RST%

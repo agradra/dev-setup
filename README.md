@@ -1,7 +1,19 @@
 ## 사용법
 
-1. 이 저장소를 `DEV` 폴더 안에 복사 (이름 자동으로 바뀜)
-2. `RUN.bat`을 더블클릭하여 실행
+1. `DEV` 폴더에서 터미널을 열고 아래 명령어로 복사
+
+   ```bash
+   git clone https://github.com/agradra/dev-setup.git .setup
+   ```
+
+   > 뒤에 `.setup`을 붙이면 처음부터 올바른 폴더 이름으로 받아집니다. 생략하고 그냥 clone 해도 `RUN.bat` 실행 시 이름이 자동으로 바뀝니다.
+
+2. `RUN.bat`을 더블클릭하여 실행하거나 터미널에서 실행
+
+   ```bash
+   cd .setup && RUN.bat
+   ```
+
 
 ## 디자인
 
