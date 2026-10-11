@@ -1,10 +1,11 @@
 ## 사용법
 
-1. `DEV` 폴더에서 터미널을 열고 아래 명령어로 복사
+1. 개발용 폴더에서 터미널을 열고 아래 명령어로 복사
 
    ```bash
    git clone https://github.com/agradra/dev-setup.git
    ```
+2. 생성된 `dev-setup` 폴더 내의 `RUN.bat` 파일 실행
 
 ## 디자인
 
