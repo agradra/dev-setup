@@ -171,7 +171,7 @@ for %%I in ("%~dp0%RESOURCE_DIR_NAME%\*.ico") do (
     set /a CNT_ICON+=1
     echo   %GRN%[ OK ]%RST% !STATE!  %BOLD%!FOLDER_NAME!%RST% %DIM%-^> %%~nxI%RST%
 
-    :: 아카이브/임시 폴더를 제외한 카테고리는 아카이브 폴더 안에도 동일하게 생성
+    :: 아카이브 내부 생성
     if /i not "!FOLDER_NAME!"=="%ARCHIVE_DIR_NAME%" if /i not "!FOLDER_NAME!"=="%TEMP_DIR_NAME%" (
         set "ARCH_FOLDER=!PARENT_DIR!\%ARCHIVE_DIR_NAME%\!FOLDER_NAME!"
         set "ARCH_STATE=%DIM%기존%RST%"
@@ -200,8 +200,18 @@ echo.
 
 echo %BLU%%BOLD%[3/3] 아이콘 캐시 갱신%RST%
 echo %DIM%------------------------------------------------------------%RST%
+echo   %DIM%탐색기를 종료하고 아이콘 캐시를 삭제합니다...%RST%
+taskkill /f /im explorer.exe >nul 2>&1
+timeout /t 1 /nobreak >nul
+ie4uinit.exe -ClearIconCache >nul 2>&1
+ie4uinit.exe -cleariconcache >nul 2>&1
+del /a /f /q "%LocalAppData%\IconCache.db" >nul 2>&1
+del /a /f /q "%LocalAppData%\Microsoft\Windows\Explorer\iconcache_*.db" >nul 2>&1
+del /a /f /q "%LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db" >nul 2>&1
+start "" explorer.exe
+timeout /t 2 /nobreak >nul
 ie4uinit.exe -show
-echo   %GRN%[ OK ]%RST%   탐색기 아이콘 캐시를 새로고침했습니다.
+echo   %GRN%[ OK ]%RST%   아이콘 캐시를 삭제하고 탐색기를 재시작했습니다.
 timeout /t 2 >nul
 echo.
 
