@@ -200,18 +200,9 @@ echo.
 
 echo %BLU%%BOLD%[3/3] 아이콘 캐시 갱신%RST%
 echo %DIM%------------------------------------------------------------%RST%
-echo   %DIM%탐색기를 종료하고 아이콘 캐시를 삭제합니다...%RST%
-taskkill /f /im explorer.exe >nul 2>&1
-timeout /t 1 /nobreak >nul
-ie4uinit.exe -ClearIconCache >nul 2>&1
-ie4uinit.exe -cleariconcache >nul 2>&1
-del /a /f /q "%LocalAppData%\IconCache.db" >nul 2>&1
-del /a /f /q "%LocalAppData%\Microsoft\Windows\Explorer\iconcache_*.db" >nul 2>&1
-del /a /f /q "%LocalAppData%\Microsoft\Windows\Explorer\thumbcache_*.db" >nul 2>&1
-start "" explorer.exe
-timeout /t 2 /nobreak >nul
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0refresh-icons.ps1" -Root "!PARENT_DIR!"
 ie4uinit.exe -show
-echo   %GRN%[ OK ]%RST%   아이콘 캐시를 삭제하고 탐색기를 재시작했습니다.
+echo   %GRN%[ OK ]%RST%   탐색기 아이콘 캐시를 새로고침했습니다.
 timeout /t 2 >nul
 echo.
 
